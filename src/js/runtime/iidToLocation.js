@@ -26,35 +26,47 @@ if (typeof J$ === 'undefined') {
     if (typeof sandbox.iidToLocation !== 'undefined') {
         return;
     }
-    sandbox.iidToLocation = function (sid, iid) {
-        var ret, arr, gid=sid;
-        if (sandbox.smap) {
+    var adapter=sandbox.adapter;
+    if(adapter) {
+        sandbox.iidToLocation = function (sid, iid) {
             if (typeof sid === 'string' && sid.indexOf(':')>=0) {
                 sid = sid.split(':');
-                iid = parseInt(sid[1]);
-                sid = parseInt(sid[0]);
+                return adapter.iidToLocation(sid[1]);
             } else {
-                gid = sid+":"+iid;
-            }
-            if ((ret = sandbox.smap[sid])) {
-                var fname = ret.originalCodeFileName;
-                if (ret.evalSid !== undefined) {
-                    fname = fname+sandbox.iidToLocation(ret.evalSid, ret.evalIid);
-                }
-                arr = ret[iid];
-                if (arr) {
-                    if (sandbox.Results) {
-                        return "<a href=\"javascript:iidToDisplayCodeLocation('"+gid+"');\">(" + fname + ":" + arr[0] + ":" + arr[1] + ":" + arr[2] + ":" + arr[3] + ")</a>";
-                    } else {
-                        return "(" + fname + ":" + arr[0] + ":" + arr[1] + ":" + arr[2] + ":" + arr[3] + ")";
-                    }
-                } else {
-                    return "(" + fname + ":iid" + iid + ")";
-                }
+                return adapter.iidToLocation(sid);
             }
         }
-        return sid+"";
-    };
+    } else {
+        sandbox.iidToLocation = function (sid, iid) {
+            var ret, arr, gid=sid;
+            if (sandbox.smap) {
+                if (typeof sid === 'string' && sid.indexOf(':')>=0) {
+                    sid = sid.split(':');
+                    iid = parseInt(sid[1]);
+                    sid = parseInt(sid[0]);
+                } else {
+                    gid = sid+":"+iid;
+                }
+                if ((ret = sandbox.smap[sid])) {
+                    var fname = ret.originalCodeFileName;
+                    if (ret.evalSid !== undefined) {
+                        fname = fname+sandbox.iidToLocation(ret.evalSid, ret.evalIid);
+                    }
+                    arr = ret[iid];
+                    if (arr) {
+                        if (sandbox.Results) {
+                            return "<a href=\"javascript:iidToDisplayCodeLocation('"+gid+"');\">(" + fname + ":" + arr[0] + ":" + arr[1] + ":" + arr[2] + ":" + arr[3] + ")</a>";
+                        } else {
+                            return "(" + fname + ":" + arr[0] + ":" + arr[1] + ":" + arr[2] + ":" + arr[3] + ")";
+                        }
+                    } else {
+                        return "(" + fname + ":iid" + iid + ")";
+                    }
+                }
+            }
+            return sid+"";
+        };
+    }
 
     sandbox.getGlobalIID = function(iid) {
         return sandbox.sid +":"+iid;

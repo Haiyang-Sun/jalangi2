@@ -18,6 +18,7 @@
 module.exports.headerSources = [
     "src/js/Constants.js",
     "src/js/Config.js",
+    "src/js/runtime/nodeprof.js",
     "src/js/instrument/astUtil.js",
     "src/js/instrument/esnstrument.js",
     "src/js/runtime/iidToLocation.js",

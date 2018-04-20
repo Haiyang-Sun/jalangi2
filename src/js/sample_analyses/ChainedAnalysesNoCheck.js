@@ -19,6 +19,7 @@
 // JALANGI DO NOT INSTRUMENT
 
 (function (sandbox) {
+    var adapter = sandbox.adapter;
     function ChainedAnalysesNoCheck() {
 
         var funList = ["_return", "_throw", "_with",
@@ -30,16 +31,21 @@
             "literal", "onReady","putFieldPre",
             "putField", "read", "runInstrumentedFunctionBody",
             "scriptEnter", "scriptExit",  "unaryPre",
-            "unary", "write"];
+            "unary", "write",
+            "evalFunctionPre", "evalFunctionPost",
+            "evalPre", "evalPost"
+        ];
 
         this.globals = {};
 
         this.addAnalysis = function (analysis) {
             var self = this, tmp, length = funList.length;
-
             for (var i = 0; i < length; i++) {
                 var field = funList[i];
                 if (tmp = analysis[field]) {
+                    if(adapter) {
+                        adapter.registerCallback(analysis, field, tmp);
+                    }
                     var fun = self[field];
                     if (!fun) {
                         fun = self[field] = function () {
@@ -63,6 +69,9 @@
                     fun.afs.push(tmp);
                     fun.afThis.push(analysis);
                 }
+            }
+            if(adapter) {
+                adapter.onReady(analysis);
             }
         };
     }
